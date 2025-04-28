@@ -1,5 +1,5 @@
 #!/bin/bash
-chmod +x collect_files.sh
+chmod +x dzz.sh
 set -e
 
 INPUT_DIR="$1"
