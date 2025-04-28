@@ -1,5 +1,5 @@
 #!/bin/bash
-
+chmod +x collect_files.sh
 set -e
 
 if [[ "$#" -lt 2 ]]; then
