@@ -1,16 +1,17 @@
 #!/bin/bash
+
 chmod +x collect_files.sh
+
 set -e
 
-if [[ "$#" -lt 2 ]]; then
-  echo "Usage: $0 /path/to/input_dir /path/to/output_dir [--max_depth N]"
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 INPUT_DIR OUTPUT_DIR [--max_depth N]"
   exit 1
 fi
 
 INPUT_DIR="$1"
 OUTPUT_DIR="$2"
 MAX_DEPTH=""
-
 shift 2
 
 if [[ "$1" == "--max_depth" && -n "$2" ]]; then
@@ -25,29 +26,34 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 if [[ -n "$MAX_DEPTH" ]]; then
-  find "$INPUT_DIR" -mindepth 1 -maxdepth "$MAX_DEPTH" -type f
+  FIND_CMD=(find "$INPUT_DIR" -mindepth 1 -maxdepth "$MAX_DEPTH" -type f)
 else
-  find "$INPUT_DIR" -type f
-fi | while read -r filepath; do
-  filename=$(basename "$filepath")
-  name="${filename%.*}"
-  ext="${filename##*.}"
+  FIND_CMD=(find "$INPUT_DIR" -type f)
+fi
+
+"${FIND_CMD[@]}" | while IFS= read -r file_path; do
+  base_name="$(basename "$file_path")"
+  name="${base_name%.*}"
+  extension="${base_name##*.}"
 
  
-  if [[ "$name" == "$filename" ]]; then
-    ext=""
+  if [[ "$name" == "$base_name" ]]; then
+    extension=""
   else
-    ext=".$ext"
+    extension=".$extension"
   fi
 
-  newname="$filename"
+  dest_file="$OUTPUT_DIR/$base_name"
   counter=1
 
  
-  while [[ -e "$OUTPUT_DIR/$newname" ]]; do
-    newname="${name}${counter}${ext}"
+  while [[ -e "$dest_file" ]]; do
+    dest_file="$OUTPUT_DIR/${name}${counter}${extension}"
     ((counter++))
   done
 
-  cp "$filepath" "$OUTPUT_DIR/$newname"
+ 
+  cp "$file_path" "$dest_file"
 done
+
+exit 0
